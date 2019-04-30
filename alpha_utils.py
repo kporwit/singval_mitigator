@@ -10,11 +10,6 @@ def diag_perm(mat, tab):
         mat[ind, ind] = mat_copy[nind, nind]
     return mat
 
-#comparision betwen experimental boundries
-expmatrix1 = [[1.3e-3, 0, 0], [6.8e-4, 2.2e-4, 0], [2.7e-3, 1.2e-3, 2.8e-3]]
-expmatrix2 = [[2.4e-2, 0, 0], [2.5e-2, 2.2e-2, 0], [6.9e-2, 1.2e-2, 1.0e-1]]
-expmatrix3 = [[1.0e-2, 0, 0], [1.7e-2, 1.4e-2, 0], [4.5e-2, 5.3e-2, 1.0e-1]]
-
 #lower triangular matrix creation and comparison
 def create_alpha(singval_tab, eigenval_tab, verbosity):
     if verbosity > 0:
