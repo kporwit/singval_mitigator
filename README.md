@@ -7,4 +7,4 @@ alpha_utils.py consists the original script from [1] converted to python. One mu
 
 If verbosity is greater than 0 output from original script will be printed. 
 
-create_alpha function returns lists of 1's if majorization is not satisfied.Otherwise matrix with prescribed eigenvalues and singular values is returned.
+create_alpha function returns lists of 1's if majorization is not satisfied. Otherwise matrix with prescribed eigenvalues and singular values is returned.
