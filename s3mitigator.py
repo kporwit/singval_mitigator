@@ -85,6 +85,8 @@ for i in range(decraesequantity):
                 f.write(string)
                 f.write('created matrix:\n')
                 f.write(str(result) + '\n')
+                f.write('rounded singular values of produced matrix: ' +\
+                        str(np.around(singv, decimals=3)) + '\n')
                 f.write('singular values of produced matrix: ' +\
                         str(singv) + '\n')
                 f.write('eigenvalues of produced matrix: ' + str(eigv) + '\n')
