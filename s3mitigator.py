@@ -105,5 +105,9 @@ for i in range(decraesequantity):
         break
     else:
         s[2] -= sjump
+        if exp_boundry == 1:
+            s[2] = np.around(s[2], decimals=4)
+        else:
+            s[2] = np.around(s[2], decimals=3)
 f.close()
 

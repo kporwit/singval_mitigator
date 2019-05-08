@@ -108,8 +108,16 @@ for i in range(decraesequantity):
         break
     elif control == 1:
         s[2] -= sjump
+        if exp_boundry == 1:
+            s[2] = np.around(s[2], decimals=4)
+        else:
+            s[2] = np.around(s[2], decimals=3)
         control = 2
     elif control == 2:
         s[1] -= sjump
+        if exp_boundry == 1:
+            s[1] = np.around(s[1], decimals=4)
+        else:
+            s[1] = np.around(s[1], decimals=3)
         control = 1
 f.close()
