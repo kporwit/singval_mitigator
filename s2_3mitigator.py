@@ -39,6 +39,9 @@ expmatrix3 = np.array([[1.0e-2, 0, 0],\
                        [1.7e-2, 1.4e-2, 0],\
                        [4.5e-2, 5.3e-2, 1.0e-1]], dtype=np.float64)
 
+#matrices for maximal and minimal entries of generated alpha
+maximal = np.zeros((3,3), dtype=np.float64)
+minimal = np.zeros((3,3), dtype=np.float64)
 exp_boundry = int(sys.argv[2])
 
 if exp_boundry == 1:
@@ -85,6 +88,12 @@ for i in range(decraesequantity):
                 0 < np.abs(result[2,0]) <= np.abs(compmatrix[2,0]) and
                 0 < np.abs(result[2,1]) <= np.abs(compmatrix[2,1])):
                 positive_fit += 1
+                absresult = np.absolute(result)
+                if i == 0:
+                    maximal = np.copy(absresult)
+                    minimal = np.copy(absresult)
+                np.putmask(maximal, absresult>maximal, absresult)
+                np.putmask(minimal, absresult<minimal, absresult)
                 f.write('----------------------------------------\n')
                 string = 'singular values: ' + str(s) + '\neigen values: ' +\
                 str(e) + '\n'
@@ -117,4 +126,6 @@ for i in range(decraesequantity):
         s[1] -= sjump
         s[1] = np.around(s[1], decimals)
         control = 1
+f.write('----------------------------------------\nMaximal values:\n' + str(maximal) + '\nMinimal\
+        values:\n' + str(minimal) + '\n')
 f.close()

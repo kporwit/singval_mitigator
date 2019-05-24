@@ -37,6 +37,10 @@ expmatrix3 = np.array([[1.0e-2, 0, 0],\
                        [1.7e-2, 1.4e-2, 0],\
                        [4.5e-2, 5.3e-2, 1.0e-1]], dtype=np.float64)
 
+#matrices for maximal and minimal entries of generated alpha
+maximal = np.zeros((3,3), dtype=np.float64)
+minimal = np.zeros((3,3), dtype=np.float64)
+
 exp_boundry = int(sys.argv[2])
 
 if exp_boundry == 1:
@@ -61,11 +65,11 @@ elif exp_boundry == 3:
 loopbreak = 1
 nthrows = int(sys.argv[3])
 
-for i in range(decraesequantity):
+for i in xrange(decraesequantity):
     maj_problem = 0
     positive_fit = 0
     negative_fit = 0
-    for j in tqdm(range(nthrows)):
+    for j in tqdm(xrange(nthrows)):
         e = np.array([uniform(compmatrix[0,0], 1), uniform(compmatrix[1,1], 1),
              uniform(compmatrix[2,2], 1)], dtype=np.float64)
         result = create_alpha(s, e, 0)
@@ -82,6 +86,12 @@ for i in range(decraesequantity):
                     np.abs(result[2,0]) <= np.abs(compmatrix[2,0]) and
                     np.abs(result[2,1]) <= np.abs(compmatrix[2,1])):
                 positive_fit += 1
+                absresult = np.absolute(result)
+                if i == 0:
+                    maximal = np.copy(absresult)
+                    minimal = np.copy(absresult)
+                np.putmask(maximal, absresult>maximal, absresult)
+                np.putmask(minimal, absresult<minimal, absresult)
                 f.write('----------------------------------------\n')
                 string = 'singular values: ' + str(s) + '\neigen values: ' +\
                 str(e) + '\n'
@@ -109,5 +119,7 @@ for i in range(decraesequantity):
     else:
         s[2] -= sjump
         s[2] = np.around(s[2], decimals)
+f.write('----------------------------------------\nMaximal values:\n' + str(maximal) + '\nMinimal\
+        values:\n' + str(minimal) + '\n')
 f.close()
 
