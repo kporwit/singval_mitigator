@@ -131,9 +131,9 @@ for i in xrange(decraesequantity):
         s[2] -= sjump
         s[2] = np.around(s[2], decimals)
 if tex_out == 1:
-    np.around(fin_result, decimals=5)
-    np.around(eigv, decimals=5)
-    np.around(singv, decimals=3)
+    fin_result = np.around(fin_result, decimals=5)
+    eigv = np.around(eigv, decimals=5)
+    singv = np.around(singv, decimals=3)
     f.write('----------------------------------------\nMaximal values:\n' + str(maximal) + '\nMinimal\
             values:\n' + str(minimal) + '\n')
     f.write('-----Latex script with output-----\n\n')
@@ -179,4 +179,12 @@ if tex_out == 1:
                  + str(minimal[2,1]) + ' - ' + str(maximal[2,1]) + ' & '\
                  + str(minimal[2,2]) + ' - ' + str(maximal[2,2]) + '\\\\\n')
     f.write('\end{pmatrix}$$\n')
+    f.write('-----Data for table script-----\n')
+    f.write(str(fin_result[0,0])+','+str(minimal[0,0])+','+str(maximal[0,0])+'\n')
+    f.write(str(fin_result[1,0])+','+str(minimal[1,0])+','+str(maximal[1,0])+'\n')
+    f.write(str(fin_result[1,1])+','+str(minimal[1,1])+','+str(maximal[1,1])+'\n')
+    f.write(str(fin_result[2,0])+','+str(minimal[2,0])+','+str(maximal[2,0])+'\n')
+    f.write(str(fin_result[2,1])+','+str(minimal[2,1])+','+str(maximal[2,1])+'\n')
+    f.write(str(fin_result[2,2])+','+str(minimal[2,2])+','+str(maximal[2,2])+'\n')
+    f.write(str(singv[0])+','+str(singv[1])+','+str(singv[2])+'\n')
 f.close()
