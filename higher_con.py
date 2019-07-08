@@ -65,26 +65,26 @@ for scen, mass in zip(srow,mcol):
     print 'scenario:', scen+1
     print 'mass:', mass+1
     #shows the space for possible restriction of experimental limits
-    #print 's_mi:\n', s_mi[scen,mass]
-    #print 's_ma:\n', s_ma[scen,mass]
+    print 's_mi:\n', s_mi[scen,mass]
+    print 's_ma:\n', s_ma[scen,mass]
     compmi=np.subtract(s_mi[scen,mass],exp_mi[mass])
     compma=np.subtract(exp_ma[mass],s_ma[scen,mass])
     print 'compmi:\n', compmi
     print 'compma:\n', compma
     for i, j in zip(row, col):
         print 'i:',i+1,'j:',j+1
-        stepe=step_size(compmi[i,j])
+        stepe=step_size(compma[i,j])
         #print 'stepe:', stepe
         stepsize=10**(-(stepe))
         #apply precision
         stepsize*=10**(-precision)
-        stepnum=compmi[i,j]/stepsize
+        stepnum=compma[i,j]/stepsize
         print 'stepnum:', stepnum
         print 'int(stepnum):', int(stepnum)
         print 'stepsize:', stepsize
         for fix in xrange(int(stepnum)):
-            newa=np.copy(s_mi[scen,mass])
-            newa[i,j]=exp_mi[mass][i,j]
+            newa=np.copy(s_ma[scen,mass])
+            newa[i,j]+=stepsize
             step=np.full((3,3),stepsize,dtype=np.float64)
             step=np.tril(step)
             step[i,j]=0
@@ -94,7 +94,7 @@ for scen, mass in zip(srow,mcol):
             while True:
                 #print newa
                 old_step=np.copy(step)
-                step=np.where(newa<s_ma[scen,mass],step,0)
+                step=np.where(newa<exp_ma[mass],step,0)
                 if np.array_equal(step,old_step)==False:
                     test=np.subtract(old_step,step)
                     newa=np.subtract(newa,test)
