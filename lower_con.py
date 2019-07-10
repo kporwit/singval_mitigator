@@ -60,6 +60,9 @@ mcol=[0, 1, 2, 0, 1, 2, 0, 1, 2]
 precision=0
 for scen, mass in zip(srow,mcol):
     c=[0, 0, 0, 0, 0, 0]
+    v1=[0, 0, 0, 0, 0, 0]
+    v2=[0, 0, 0, 0, 0, 0]
+    v3=[0, 0, 0, 0, 0, 0]
     nc=[0, 0, 0, 0, 0, 0]
     indx=0
     print 'scenario:', scen+1
@@ -112,9 +115,18 @@ for scen, mass in zip(srow,mcol):
                     print 'newa:\n',newa
                     print 'singular values:',s
                     nc[indx]+=1
+                if s[0]>=1.0 and s[1]>=1.0 and s[2]<1.0:
+                    v1[indx]+=1
+                elif s[0]>=1.0 and s[1]<1.0 and s[2]<1.0:
+                    v2[indx]+=1
+                elif s[0]<1.0 and s[1]<1.0 and s[2]<1.0:
+                    v3[indx]+=1
                 newa+=step
         indx+=1
     print '========================================'
     print 'number of contractions for a elements: ', c
+    print 'number of v1 for a elements: ', v1
+    print 'number of v2 for a elements: ', v2
+    print 'number of v3 for a elements: ', v3
     print 'number of non-contractions for a elements: ', nc
     print '========================================'
