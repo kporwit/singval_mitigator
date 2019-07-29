@@ -53,11 +53,15 @@ s_ma=np.array([[s3_ma1, s3_ma2, s3_ma3],\
 #tables of indices
 row=[0, 1, 2, 1, 2, 2]
 col=[0, 1, 2, 0, 0, 1]
+#row=[2]
+#col=[0]
 #tables of indices
 srow=[0, 0, 0, 1, 1, 1, 2, 2, 2]
 mcol=[0, 1, 2, 0, 1, 2, 0, 1, 2]
+#srow=[2]
+#mcol=[1]
 #precision (insert >0 for greater than algorithm predicted precision)
-precision=0
+precision=1
 for scen, mass in zip(srow,mcol):
     c=[0, 0, 0, 0, 0, 0]
     v1=[0, 0, 0, 0, 0, 0]
@@ -86,18 +90,19 @@ for scen, mass in zip(srow,mcol):
         print 'int(stepnum):', int(stepnum)
         print 'stepsize:', stepsize
         for fix in xrange(int(stepnum)):
-            newa=np.copy(s_ma[scen,mass])
+            newa=np.copy(s_mi[scen,mass])
             newa[i,j]+=stepsize
             step=np.full((3,3),stepsize,dtype=np.float64)
             step=np.tril(step)
             step[i,j]=0
-            if fix != 0:
-                newa[i,j]+=stepsize*fix
-            #print 'fix', fix
+            #if fix != 0:
+            newa[i,j]=s_ma[scen,mass][i,j]
+            newa[i,j]+=stepsize*fix
+            print 'fix', fix
             while True:
                 #print newa
                 old_step=np.copy(step)
-                step=np.where(newa<exp_ma[mass],step,0)
+                step=np.where(newa<s_ma[scen,mass],step,0)
                 if np.array_equal(step,old_step)==False:
                     test=np.subtract(old_step,step)
                     newa=np.subtract(newa,test)
@@ -108,19 +113,22 @@ for scen, mass in zip(srow,mcol):
                     break
                 u,s,vh=np.linalg.svd(newa)
                 #print 's:',s
-                if (s<1.0).any():
+                s=np.around(s,decimals=5)
+                #print 'rounded s', s
+                if (s<0.99997).any():
                     c[indx]+=1
-                elif (s>=1.0).all():
-                    print 'fix:',fix
-                    print 'newa:\n',newa
-                    print 'singular values:',s
-                    nc[indx]+=1
-                if s[0]>=1.0 and s[1]>=1.0 and s[2]<1.0:
+                if (s[0]>=0.99997 and s[0]<=1.00003\
+                    and s[1]>=0.99997 and s[1]<=1.00003\
+                    and s[2]<0.99997):
                     v1[indx]+=1
-                elif s[0]>=1.0 and s[1]<1.0 and s[2]<1.0:
+                elif (s[0]>=0.99997 and s[0]<=1.00003\
+                      and s[1]<0.99997\
+                      and s[2]<0.99997):
                     v2[indx]+=1
-                elif s[0]<1.0 and s[1]<1.0 and s[2]<1.0:
+                elif (s[0]<0.99997 and s[1]<0.99997 and s[2]<0.99997):
                     v3[indx]+=1
+                else:
+                    nc[indx]+=1
                 newa+=step
         indx+=1
     print '========================================'
@@ -128,5 +136,5 @@ for scen, mass in zip(srow,mcol):
     print 'number of v1 for a elements: ', v1
     print 'number of v2 for a elements: ', v2
     print 'number of v3 for a elements: ', v3
-    print 'number of non-contractions for a elements: ', nc
+    print 'number of above error contractions for a elements: ', nc
     print '========================================'

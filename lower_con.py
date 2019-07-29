@@ -51,19 +51,18 @@ s_ma=np.array([[s3_ma1, s3_ma2, s3_ma3],\
                [s1_ma1, s1_ma2, s1_ma3]])
 
 #tables of indices
-row=[0, 1, 2, 1, 2, 2]
-col=[0, 1, 2, 0, 0, 1]
+#row=[0, 1, 2, 1, 2, 2]
+#col=[0, 1, 2, 0, 0, 1]
+row=[2]
+col=[0]
 #tables of indices
-srow=[0, 0, 0, 1, 1, 1, 2, 2, 2]
-mcol=[0, 1, 2, 0, 1, 2, 0, 1, 2]
+#srow=[0, 0, 0, 1, 1, 1, 2, 2, 2]
+#mcol=[0, 1, 2, 0, 1, 2, 0, 1, 2]
+srow=[2]
+mcol=[1]
 #precision (insert >0 for greater than algorithm predicted precision)
-precision=0
+precision=1
 for scen, mass in zip(srow,mcol):
-    c=[0, 0, 0, 0, 0, 0]
-    v1=[0, 0, 0, 0, 0, 0]
-    v2=[0, 0, 0, 0, 0, 0]
-    v3=[0, 0, 0, 0, 0, 0]
-    nc=[0, 0, 0, 0, 0, 0]
     indx=0
     print 'scenario:', scen+1
     print 'mass:', mass+1
@@ -79,13 +78,20 @@ for scen, mass in zip(srow,mcol):
         stepe=step_size(compmi[i,j])
         #print 'stepe:', stepe
         stepsize=10**(-(stepe))
+        #stepsize=10**(-5)
         #apply precision
         stepsize*=10**(-precision)
         stepnum=compmi[i,j]/stepsize
+        #stepnum=10
         print 'stepnum:', stepnum
         print 'int(stepnum):', int(stepnum)
         print 'stepsize:', stepsize
         for fix in xrange(int(stepnum)):
+            c=[0, 0, 0, 0, 0, 0]
+            v1=[0, 0, 0, 0, 0, 0]
+            v2=[0, 0, 0, 0, 0, 0]
+            v3=[0, 0, 0, 0, 0, 0]
+            nc=[0, 0, 0, 0, 0, 0]
             newa=np.copy(s_mi[scen,mass])
             newa[i,j]=exp_mi[mass][i,j]
             step=np.full((3,3),stepsize,dtype=np.float64)
@@ -93,9 +99,9 @@ for scen, mass in zip(srow,mcol):
             step[i,j]=0
             if fix != 0:
                 newa[i,j]+=stepsize*fix
-            #print 'fix', fix
+            print 'fix', fix
             while True:
-                #print newa
+                print newa
                 old_step=np.copy(step)
                 step=np.where(newa<s_ma[scen,mass],step,0)
                 if np.array_equal(step,old_step)==False:
@@ -107,26 +113,36 @@ for scen, mass in zip(srow,mcol):
                     #print 'newa:\n', newa
                     break
                 u,s,vh=np.linalg.svd(newa)
-                #print 's:',s
+                print 's:',s
+                s=np.around(s,decimals=5)
+                print 'rounded s:',s
                 if (s<1.0).any():
                     c[indx]+=1
                 elif (s>=1.0).all():
-                    print 'fix:',fix
-                    print 'newa:\n',newa
-                    print 'singular values:',s
+                    #print 'fix:',fix
+                    #print 'newa:\n',newa
+                    #print 'singular values:',s
                     nc[indx]+=1
-                if s[0]>=1.0 and s[1]>=1.0 and s[2]<1.0:
+                if (s[0]>=0.99997 and s[0]<=1.00003\
+                    and s[1]>=0.99997 and s[1]<=1.00003\
+                    and s[2]<0.99997):
                     v1[indx]+=1
-                elif s[0]>=1.0 and s[1]<1.0 and s[2]<1.0:
+                elif (s[0]>=0.99997 and s[0]<=1.00003\
+                      and s[1]<0.99997
+                      and s[2]<0.99997):
                     v2[indx]+=1
-                elif s[0]<1.0 and s[1]<1.0 and s[2]<1.0:
+                elif (s[0]<0.9999
+                      and s[1]<0.99997
+                      and s[2]<0.99997):
                     v3[indx]+=1
+                else:
+                    nc[indx]+=1
                 newa+=step
+            print '========================================'
+            print 'number of contractions for a elements: ', c
+            print 'number of v1 for a elements: ', v1
+            print 'number of v2 for a elements: ', v2
+            print 'number of v3 for a elements: ', v3
+            print 'number of non-contractions for a elements: ', nc
+            print '========================================'
         indx+=1
-    print '========================================'
-    print 'number of contractions for a elements: ', c
-    print 'number of v1 for a elements: ', v1
-    print 'number of v2 for a elements: ', v2
-    print 'number of v3 for a elements: ', v3
-    print 'number of non-contractions for a elements: ', nc
-    print '========================================'
