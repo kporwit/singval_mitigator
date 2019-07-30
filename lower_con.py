@@ -63,6 +63,11 @@ mcol=[1]
 #precision (insert >0 for greater than algorithm predicted precision)
 precision=1
 for scen, mass in zip(srow,mcol):
+    c=[0, 0, 0, 0, 0, 0]
+    v1=[0, 0, 0, 0, 0, 0]
+    v2=[0, 0, 0, 0, 0, 0]
+    v3=[0, 0, 0, 0, 0, 0]
+    nc=[0, 0, 0, 0, 0, 0]
     indx=0
     print 'scenario:', scen+1
     print 'mass:', mass+1
@@ -87,11 +92,6 @@ for scen, mass in zip(srow,mcol):
         print 'int(stepnum):', int(stepnum)
         print 'stepsize:', stepsize
         for fix in xrange(int(stepnum)):
-            c=[0, 0, 0, 0, 0, 0]
-            v1=[0, 0, 0, 0, 0, 0]
-            v2=[0, 0, 0, 0, 0, 0]
-            v3=[0, 0, 0, 0, 0, 0]
-            nc=[0, 0, 0, 0, 0, 0]
             newa=np.copy(s_mi[scen,mass])
             newa[i,j]=exp_mi[mass][i,j]
             step=np.full((3,3),stepsize,dtype=np.float64)
@@ -107,7 +107,9 @@ for scen, mass in zip(srow,mcol):
                 if np.array_equal(step,old_step)==False:
                     test=np.subtract(old_step,step)
                     newa=np.subtract(newa,test)
-                #print step
+                    print 'Treshold'
+                    continue
+                print step
                 if (step==0).all():
                     #print 'break by newa'
                     #print 'newa:\n', newa
@@ -116,33 +118,28 @@ for scen, mass in zip(srow,mcol):
                 print 's:',s
                 s=np.around(s,decimals=5)
                 print 'rounded s:',s
-                if (s<1.0).any():
+                if (s<0.99997).any():
                     c[indx]+=1
-                elif (s>=1.0).all():
-                    #print 'fix:',fix
-                    #print 'newa:\n',newa
-                    #print 'singular values:',s
-                    nc[indx]+=1
                 if (s[0]>=0.99997 and s[0]<=1.00003\
                     and s[1]>=0.99997 and s[1]<=1.00003\
                     and s[2]<0.99997):
                     v1[indx]+=1
                 elif (s[0]>=0.99997 and s[0]<=1.00003\
-                      and s[1]<0.99997
+                      and s[1]<0.99997\
                       and s[2]<0.99997):
                     v2[indx]+=1
-                elif (s[0]<0.9999
-                      and s[1]<0.99997
+                elif (s[0]<0.99997\
+                      and s[1]<0.99997\
                       and s[2]<0.99997):
                     v3[indx]+=1
                 else:
                     nc[indx]+=1
                 newa+=step
-            print '========================================'
-            print 'number of contractions for a elements: ', c
-            print 'number of v1 for a elements: ', v1
-            print 'number of v2 for a elements: ', v2
-            print 'number of v3 for a elements: ', v3
-            print 'number of non-contractions for a elements: ', nc
-            print '========================================'
         indx+=1
+    print '========================================'
+    print 'number of contractions for a elements: ', c
+    print 'number of v1 for a elements: ', v1
+    print 'number of v2 for a elements: ', v2
+    print 'number of v3 for a elements: ', v3
+    print 'number of above error contractions for a elements: ', nc
+    print '========================================'

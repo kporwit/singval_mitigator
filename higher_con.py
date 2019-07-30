@@ -56,10 +56,10 @@ col=[0, 1, 2, 0, 0, 1]
 #row=[2]
 #col=[0]
 #tables of indices
-srow=[0, 0, 0, 1, 1, 1, 2, 2, 2]
-mcol=[0, 1, 2, 0, 1, 2, 0, 1, 2]
-#srow=[2]
-#mcol=[1]
+#srow=[0, 0, 0, 1, 1, 1, 2, 2, 2]
+#mcol=[0, 1, 2, 0, 1, 2, 0, 1, 2]
+srow=[2,2,2]
+mcol=[0,1,2]
 #precision (insert >0 for greater than algorithm predicted precision)
 precision=1
 for scen, mass in zip(srow,mcol):
@@ -80,11 +80,12 @@ for scen, mass in zip(srow,mcol):
     print 'compma:\n', compma
     for i, j in zip(row, col):
         print 'i:',i+1,'j:',j+1
-        stepe=step_size(compma[i,j])
+        #stepe=step_size(compma[i,j])
         #print 'stepe:', stepe
-        stepsize=10**(-(stepe))
+        #stepsize=10**(-(stepe))
         #apply precision
-        stepsize*=10**(-precision)
+        #stepsize*=10**(-precision)
+        stepsize=1e-6
         stepnum=compma[i,j]/stepsize
         print 'stepnum:', stepnum
         print 'int(stepnum):', int(stepnum)
@@ -98,14 +99,16 @@ for scen, mass in zip(srow,mcol):
             #if fix != 0:
             newa[i,j]=s_ma[scen,mass][i,j]
             newa[i,j]+=stepsize*fix
-            print 'fix', fix
+            #print 'fix', fix
             while True:
-                #print newa
+                print newa
                 old_step=np.copy(step)
                 step=np.where(newa<s_ma[scen,mass],step,0)
                 if np.array_equal(step,old_step)==False:
                     test=np.subtract(old_step,step)
                     newa=np.subtract(newa,test)
+                    #print "treshold reached"
+                    continue
                 #print step
                 if (step==0).all():
                     #print 'break by newa'
@@ -125,7 +128,9 @@ for scen, mass in zip(srow,mcol):
                       and s[1]<0.99997\
                       and s[2]<0.99997):
                     v2[indx]+=1
-                elif (s[0]<0.99997 and s[1]<0.99997 and s[2]<0.99997):
+                elif (s[0]<0.99997\
+                      and s[1]<0.99997\
+                      and s[2]<0.99997):
                     v3[indx]+=1
                 else:
                     nc[indx]+=1
