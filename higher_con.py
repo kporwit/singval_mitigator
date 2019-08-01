@@ -62,6 +62,8 @@ srow=[2,2,2]
 mcol=[0,1,2]
 #precision (insert >0 for greater than algorithm predicted precision)
 precision=1
+lowerError=0.99997
+higherError=1.00003
 for scen, mass in zip(srow,mcol):
     c=[0, 0, 0, 0, 0, 0]
     v1=[0, 0, 0, 0, 0, 0]
@@ -101,7 +103,7 @@ for scen, mass in zip(srow,mcol):
             newa[i,j]+=stepsize*fix
             #print 'fix', fix
             while True:
-                print newa
+                #print newa
                 old_step=np.copy(step)
                 step=np.where(newa<s_ma[scen,mass],step,0)
                 if np.array_equal(step,old_step)==False:
@@ -118,19 +120,19 @@ for scen, mass in zip(srow,mcol):
                 #print 's:',s
                 s=np.around(s,decimals=5)
                 #print 'rounded s', s
-                if (s<0.99997).any():
+                if (s<lowerError).any():
                     c[indx]+=1
-                if (s[0]>=0.99997 and s[0]<=1.00003\
-                    and s[1]>=0.99997 and s[1]<=1.00003\
-                    and s[2]<0.99997):
+                if (s[0]>=lowerError and s[0]<=higherError\
+                    and s[1]>=lowerError and s[1]<=higherError\
+                    and s[2]<lowerError):
                     v1[indx]+=1
-                elif (s[0]>=0.99997 and s[0]<=1.00003\
-                      and s[1]<0.99997\
-                      and s[2]<0.99997):
+                elif (s[0]>=lowerError and s[0]<=higherError\
+                      and s[1]<lowerError\
+                      and s[2]<lowerError):
                     v2[indx]+=1
-                elif (s[0]<0.99997\
-                      and s[1]<0.99997\
-                      and s[2]<0.99997):
+                elif (s[0]<lowerError\
+                      and s[1]<lowerError\
+                      and s[2]<lowerError):
                     v3[indx]+=1
                 else:
                     nc[indx]+=1

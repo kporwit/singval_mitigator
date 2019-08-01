@@ -51,17 +51,19 @@ s_ma=np.array([[s3_ma1, s3_ma2, s3_ma3],\
                [s1_ma1, s1_ma2, s1_ma3]])
 
 #tables of indices
-#row=[0, 1, 2, 1, 2, 2]
-#col=[0, 1, 2, 0, 0, 1]
-row=[2]
-col=[0]
+row=[0, 1, 2, 1, 2, 2]
+col=[0, 1, 2, 0, 0, 1]
+#row=[2]
+#col=[0]
 #tables of indices
 #srow=[0, 0, 0, 1, 1, 1, 2, 2, 2]
 #mcol=[0, 1, 2, 0, 1, 2, 0, 1, 2]
-srow=[2]
-mcol=[1]
+srow=[2,2,2]
+mcol=[0,1,2]
 #precision (insert >0 for greater than algorithm predicted precision)
 precision=1
+lowerError=0.99997
+higherError=1.00003
 for scen, mass in zip(srow,mcol):
     c=[0, 0, 0, 0, 0, 0]
     v1=[0, 0, 0, 0, 0, 0]
@@ -80,12 +82,13 @@ for scen, mass in zip(srow,mcol):
     print 'compma:\n', compma
     for i, j in zip(row, col):
         print 'i:',i+1,'j:',j+1
-        stepe=step_size(compmi[i,j])
+        #stepe=step_size(compmi[i,j])
         #print 'stepe:', stepe
-        stepsize=10**(-(stepe))
+        #stepsize=10**(-(stepe))
         #stepsize=10**(-5)
         #apply precision
-        stepsize*=10**(-precision)
+        #stepsize*=10**(-precision)
+        stepsize=1e-6
         stepnum=compmi[i,j]/stepsize
         #stepnum=10
         print 'stepnum:', stepnum
@@ -99,38 +102,38 @@ for scen, mass in zip(srow,mcol):
             step[i,j]=0
             if fix != 0:
                 newa[i,j]+=stepsize*fix
-            print 'fix', fix
+            #print 'fix', fix
             while True:
-                print newa
+                #print newa
                 old_step=np.copy(step)
                 step=np.where(newa<s_ma[scen,mass],step,0)
                 if np.array_equal(step,old_step)==False:
                     test=np.subtract(old_step,step)
                     newa=np.subtract(newa,test)
-                    print 'Treshold'
+                    #print 'Treshold'
                     continue
-                print step
+                #print step
                 if (step==0).all():
                     #print 'break by newa'
                     #print 'newa:\n', newa
                     break
                 u,s,vh=np.linalg.svd(newa)
-                print 's:',s
+                #print 's:',s
                 s=np.around(s,decimals=5)
-                print 'rounded s:',s
-                if (s<0.99997).any():
+                #print 'rounded s:',s
+                if (s<lowerError).any():
                     c[indx]+=1
-                if (s[0]>=0.99997 and s[0]<=1.00003\
-                    and s[1]>=0.99997 and s[1]<=1.00003\
-                    and s[2]<0.99997):
+                if (s[0]>=lowerError and s[0]<=higherError\
+                    and s[1]>=lowerError and s[1]<=higherError\
+                    and s[2]<lowerError):
                     v1[indx]+=1
-                elif (s[0]>=0.99997 and s[0]<=1.00003\
-                      and s[1]<0.99997\
-                      and s[2]<0.99997):
+                elif (s[0]>=lowerError and s[0]<=higherError\
+                      and s[1]<lowerError\
+                      and s[2]<lowerError):
                     v2[indx]+=1
-                elif (s[0]<0.99997\
-                      and s[1]<0.99997\
-                      and s[2]<0.99997):
+                elif (s[0]<lowerError\
+                      and s[1]<lowerError\
+                      and s[2]<lowerError):
                     v3[indx]+=1
                 else:
                     nc[indx]+=1
