@@ -58,12 +58,12 @@ col=[0, 1, 2, 0, 0, 1]
 #tables of indices
 #srow=[0, 0, 0, 1, 1, 1, 2, 2, 2]
 #mcol=[0, 1, 2, 0, 1, 2, 0, 1, 2]
-srow=[2,2,2]
+srow=[0,0,0]
 mcol=[0,1,2]
 #precision (insert >0 for greater than algorithm predicted precision)
 precision=1
-lowerError=0.99997
-higherError=1.00003
+lowerError=0.99998
+higherError=1.00002
 for scen, mass in zip(srow,mcol):
     c=[0, 0, 0, 0, 0, 0]
     v1=[0, 0, 0, 0, 0, 0]
