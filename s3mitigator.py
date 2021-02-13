@@ -10,17 +10,17 @@ import os.path
 seed(time.time())
 
 if len(sys.argv) < 3:
-    print 'This script needs 3 arguments:\n'
-    print '\t1: name of an output file, \n'
-    print '\t2: number of experimental matrix, \n'
-    print '\t3: number of random throws, \n'
+    print('This script needs 3 arguments:\n')
+    print('\t1: name of an output file, \n')
+    print('\t2: number of experimental matrix, \n')
+    print('\t3: number of random throws, \n')
     sys.exit()
 
-print 'Running s3mitigator...'
+print('Running s3mitigator...')
 
 filename = str(sys.argv[1])
 if os.path.isfile(filename) == 1:
-    print 'File exist! Exit.'
+    print('File exist! Exit.')
     sys.exit()
 else:
     f = open(filename, 'w')
@@ -46,8 +46,6 @@ fin_result = np.zeros((3,3), dtype=np.float64)
 #matrices for maximal and minimal entries of generated alpha
 maximal = np.zeros((3,3), dtype=np.float64)
 minimal = np.zeros((3,3), dtype=np.float64)
-#variable for latex output
-tex_out = 0
 
 exp_boundry = int(sys.argv[2])
 
@@ -73,12 +71,12 @@ elif exp_boundry == 3:
 loopbreak = 1
 nthrows = int(sys.argv[3])
 
-for i in xrange(decraesequantity):
+for i in range(decraesequantity):
     maj_problem = 0
     positive_fit = 0
     negative_fit = 0
-    #for j in tqdm(xrange(nthrows)):
-    for j in xrange(nthrows):
+    #for j in tqdm(range(nthrows)):
+    for j in range(nthrows):
         e = np.array([uniform(compmatrix[0,0], 1), uniform(compmatrix[1,1], 1),
              uniform(compmatrix[2,2], 1)], dtype=np.float64)
         result = create_alpha(s, e, 0)
@@ -95,7 +93,6 @@ for i in xrange(decraesequantity):
                     np.abs(result[2,0]) <= np.abs(compmatrix[2,0]) and
                     np.abs(result[2,1]) <= np.abs(compmatrix[2,1])):
                 positive_fit += 1
-                tex_out = 1
                 absresult = np.absolute(result)
                 if i == 0:
                     maximal = np.copy(absresult)
@@ -130,61 +127,4 @@ for i in xrange(decraesequantity):
     else:
         s[2] -= sjump
         s[2] = np.around(s[2], decimals)
-if tex_out == 1:
-    fin_result = np.around(fin_result, decimals=5)
-    eigv = np.around(eigv, decimals=5)
-    singv = np.around(singv, decimals=3)
-    f.write('----------------------------------------\nMaximal values:\n' + str(maximal) + '\nMinimal\
-            values:\n' + str(minimal) + '\n')
-    f.write('-----Latex script with output-----\n\n')
-    if exp_boundry == 1:
-        f.write('$$T_{\unit{m>246}{GeV}}=\n')
-    elif exp_boundry == 2:
-        f.write('$$T_{{\unit{\Delta m^2\gtrsim100}{eV^2}}}=\n')
-    else:
-        f.write('$$T_{\unit{\Delta m^2 \sim0.1-1}{eV^2}}=\n')
-    f.write(r'\begin{pmatrix}')
-    f.write('\n\t' + str(fin_result[0,0]) + ' & ' + str(fin_result[0,1])\
-            + ' & ' + str(fin_result[0,2]) + ' \\\\\n')
-    f.write('\t' + str(fin_result[1,0]) + ' & ' + str(fin_result[1,1])\
-            + ' & ' + str(fin_result[1,2]) + ' \\\\\n')
-    f.write('\t' + str(fin_result[2,0]) + ' & ' + str(fin_result[2,1])\
-            + ' & ' + str(fin_result[2,2]) + ' \\\\\n\end{pmatrix}$$\n')
-    if exp_boundry == 1:
-        f.write('$$\sigma(T_{\unit{m>246}{GeV}}) = \{' +\
-                str(singv[0]) + ', ' + str(singv[1]) + ', ' + str(singv[2]) +\
-                '\}$$\n')
-        f.write('$$\lambda(T_{\unit{m>246}{GeV}}) = \{' +\
-                str(eigv[0]) + ', ' + str(eigv[1]) + ', ' + str(eigv[2]) +\
-                '\}$$\n')
-    elif exp_boundry == 2:
-        f.write('$$\sigma(T_{\unit{\Delta m^2\gtrsim100}{eV^2}}) = \{' +\
-                str(singv[0]) + ', ' + str(singv[1]) + ', ' + str(singv[2]) +\
-                '\}$$\n')
-        f.write('$$\lambda(T_{\unit{\Delta m^2\gtrsim100}{eV^2}}) = \{' +\
-                str(eigv[0]) + ', ' + str(eigv[1]) + ', ' + str(eigv[2]) +\
-                '\}$$\n')
-    else:
-        f.write('$$\sigma(T_{\unit{\Delta m^2 \sim0.1-1}{eV^2}}) = \{' +\
-                str(singv[0]) + ', ' + str(singv[1]) + ', ' + str(singv[2]) +\
-                '\}$$\n')
-        f.write('$$\lambda(T_{\unit{\Delta m^2 \sim0.1-1}{eV^2}}) = \{' +\
-                str(eigv[0]) + ', ' + str(eigv[1]) + ', ' + str(eigv[2]) +\
-                '\}$$\n')
-    f.write(r'$$\begin{pmatrix}')
-    f.write('\n\t' + str(minimal[0,0]) + ' - ' + str(maximal[0,0]) + ' & 0 & 0 \\\\\n')
-    f.write('\t' + str(minimal[1,0]) + ' - ' + str(maximal[1,0]) + ' & '\
-                 + str(minimal[1,1]) + ' - ' + str(maximal[1,1]) + ' & 0 \\\\\n')
-    f.write('\t' + str(minimal[2,0]) + ' - ' + str(maximal[2,0]) + ' & '\
-                 + str(minimal[2,1]) + ' - ' + str(maximal[2,1]) + ' & '\
-                 + str(minimal[2,2]) + ' - ' + str(maximal[2,2]) + '\\\\\n')
-    f.write('\end{pmatrix}$$\n')
-    f.write('-----Data for table script-----\n')
-    f.write(str(fin_result[0,0])+','+str(minimal[0,0])+','+str(maximal[0,0])+'\n')
-    f.write(str(fin_result[1,0])+','+str(minimal[1,0])+','+str(maximal[1,0])+'\n')
-    f.write(str(fin_result[1,1])+','+str(minimal[1,1])+','+str(maximal[1,1])+'\n')
-    f.write(str(fin_result[2,0])+','+str(minimal[2,0])+','+str(maximal[2,0])+'\n')
-    f.write(str(fin_result[2,1])+','+str(minimal[2,1])+','+str(maximal[2,1])+'\n')
-    f.write(str(fin_result[2,2])+','+str(minimal[2,2])+','+str(maximal[2,2])+'\n')
-    f.write(str(singv[0])+','+str(singv[1])+','+str(singv[2])+'\n')
 f.close()

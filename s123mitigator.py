@@ -10,17 +10,17 @@ import os.path
 seed(time.time())
 
 if len(sys.argv) < 3:
-    print 'This script requires 3 arguments:'
-    print '\t1: name of an output file,'
-    print '\t2: number of experimental matrix,'
-    print '\t3: number of random throws.'
+    print('This script requires 3 arguments:'))
+    print('\t1: name of an output file,')
+    print('\t2: number of experimental matrix,')
+    print('\t3: number of random throws.')
     sys.exit()
 
-print 'Running s123mitigator...'
+print('Running s123mitigator...')
 
 filename = str(sys.argv[1])
 if os.path.isfile(filename) == 1:
-    print 'File exist! Exit.'
+    print('File exist! Exit.')
     sys.exit()
 else:
     f = open(filename, 'w')
@@ -46,8 +46,6 @@ fin_result = np.zeros((3,3), dtype=np.float64)
 #matrices for maximal and minimal entries of generated alpha
 maximal = np.zeros((3,3), dtype=np.float64)
 minimal = np.zeros((3,3), dtype=np.float64)
-#variable for latex output
-tex_out = 0
 
 exp_boundry = int(sys.argv[2])
 
@@ -96,7 +94,6 @@ for i in range(decraesequantity):
                 0 < np.abs(result[2,0]) <= np.abs(compmatrix[2,0]) and
                 0 < np.abs(result[2,1]) <= np.abs(compmatrix[2,1])):
                 positive_fit += 1
-                tex_out = 1
                 absresult = np.absolute(result)
                 if i == 0:
                     maximal = np.copy(absresult)
@@ -141,60 +138,4 @@ for i in range(decraesequantity):
         s[0] -=sjump
         s[0] = np.around(s[0], decimals)
         control = 1
-if tex_out == 1:
-    np.around(fin_result, decimals=5)
-    np.around(eigv, decimals=5)
-    np.around(singv, decimals=3)
-    f.write('----------------------------------------\nMaximal values:\n' + str(maximal) + '\nMinimal\
-            values:\n' + str(minimal) + '\n')
-
-    f.write('-----Latex script with output-----\n\n')
-    if exp_boundry == 1:
-        f.write('$$T_{\unit{m>246}{GeV}}=\n')
-    elif exp_boundry == 2:
-        f.write('$$T_{{\unit{\Delta m^2\gtrsim100}{eV^2}}}=\n')
-    else:
-        f.write('$$T_{\unit{\Delta m^2 \sim0.1-1}{eV^2}}=\n')
-    f.write(r'\begin{pmatrix}')
-    f.write('\n\t' + str(fin_result[0,0]) + ' & ' + str(fin_result[0,1])\
-            + ' & ' + str(fin_result[0,2]) + ' \\\\\n')
-    f.write('\t' + str(fin_result[1,0]) + ' & ' + str(fin_result[1,1])\
-            + ' & ' + str(fin_result[1,2]) + ' \\\\\n')
-    f.write('\t' + str(fin_result[2,0]) + ' & ' + str(fin_result[2,1])\
-            + ' & ' + str(fin_result[2,2]) + ' \\\\\n\end{pmatrix}$$\n')
-    if exp_boundry == 1:
-        f.write('$$\sigma(T_{\unit{m>246}{GeV}}) = \{' +\
-                str(np.around(singv[0], decimals)) + ', ' +\
-                str(np.around(singv[1], decimals)) + ', ' +\
-                str(np.around(singv[2], decimals)) +\
-                '\}$$\n')
-        f.write('$$\lambda(T_{\unit{m>246}{GeV}}) = \{' +\
-                str(eigv[0]) + ', ' + str(eigv[1]) + ', ' + str(eigv[2]) +\
-                '\}$$\n')
-    elif exp_boundry == 2:
-        f.write('$$\sigma(T_{\unit{\Delta m^2\gtrsim100}{eV^2}}) = \{' +\
-                str(np.around(singv[0], decimals)) + ', ' +\
-                str(np.around(singv[1], decimals)) + ', ' +\
-                str(np.around(singv[2], decimals)) +\
-                '\}$$\n')
-        f.write('$$\lambda(T_{\unit{\Delta m^2\gtrsim100}{eV^2}}) = \{' +\
-                str(eigv[0]) + ', ' + str(eigv[1]) + ', ' + str(eigv[2]) +\
-                '\}$$\n')
-    else:
-        f.write('$$\sigma(T_{\unit{\Delta m^2 \sim0.1-1}{eV^2}}) = \{' +\
-                str(np.around(singv[0], decimals)) + ', ' +\
-                str(np.around(singv[1], decimals)) + ', ' +\
-                str(np.around(singv[2], decimals)) +\
-                '\}$$\n')
-        f.write('$$\lambda(T_{\unit{\Delta m^2 \sim0.1-1}{eV^2}}) = \{' +\
-                str(eigv[0]) + ', ' + str(eigv[1]) + ', ' + str(eigv[2]) +\
-                '\}$$\n')
-    f.write(r'$$\begin{pmatrix}')
-    f.write('\n\t' + str(minimal[0,0]) + ' - ' + str(maximal[0,0]) + ' & 0 & 0 \\\\\n')
-    f.write('\t' + str(minimal[1,0]) + ' - ' + str(maximal[1,0]) + ' & '\
-                 + str(minimal[1,1]) + ' - ' + str(maximal[1,1]) + ' & 0 \\\\\n')
-    f.write('\t' + str(minimal[2,0]) + ' - ' + str(maximal[2,0]) + ' & '\
-                 + str(minimal[2,1]) + ' - ' + str(maximal[2,1]) + ' & '\
-                 + str(minimal[2,2]) + ' - ' + str(maximal[2,2]) + '\\\\\n')
-    f.write('\end{pmatrix}$$\n')
 f.close()
