@@ -1,6 +1,26 @@
 import numpy as np
 import logging
 import sys
+from DQN import DQNAgent
+
+def define_parameters():
+        params = dict()
+        # Neural Network
+        params['epsilon_decay_linear'] = 1/100
+        params['learning_rate'] = 0.00013629
+        params['first_layer_size'] = 200    # neurons in the first layer
+        params['second_layer_size'] = 20   # neurons in the second layer
+        params['third_layer_size'] = 50    # neurons in the third layer
+        params['episodes'] = 250          
+        params['memory_size'] = 2500
+        params['batch_size'] = 1000
+        # Settings
+        params['weights_path'] = 'weights/weights.h5'
+        params['train'] = False
+        params["test"] = True
+        params['plot_score'] = True
+
+        return params
 
 #Set up logging format
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s: %(message)s')
@@ -11,6 +31,8 @@ class Environment:
     def __init__(self, singular_values, limit_matrix):
         self.singular_values = singular_values
         self.limit_matrix = limit_matrix
+        self.change_U = 0
+        self.change_V = 0
 
         if type(self.singular_values) is not np.ndarray:
             logging.error('Provided singular values are not in a numpy array form')
@@ -37,11 +59,15 @@ class Environment:
         self.result_matrix = self.generate_result_matrix()
 
     def perform_u_change(self, change_u):
+        #saves change matrix to the class atribute
+        self.change_U = change_u
+        #performs item wise multiplication on a U matrix
         self.U = np.multiply(self.U, change_u)
         logging.debug("Generated U matrix \n%s", self.U)
         return self.U
 
     def perform_v_change(self, change_v):
+        self.change_V = change_v
         self.V = np.multiply(self.V, change_v)
         logging.debug("Generated V matrix \n%s", self.V)
         return self.V
@@ -52,13 +78,13 @@ class Environment:
         return self.result_matrix
 
 singular_values = np.array([1, 0.99], dtype=float)
-limit_matrix = np.array([[1,2],[1,2]], dtype=float)
+limit_matrix = np.array([[0.934,0.174],[0.103,0.548]], dtype=float)
 change_u = np.array([[1,1], [1,-1]], dtype=float)
 change_v = np.array([[1,-1], [1,1]], dtype=float)
-test = Environment(singular_values, limit_matrix)
-test.perform_u_change(change_u)
-test.perform_v_change(change_v)
-test.generate_result_matrix()
-print(test.U)
-print(test.V)
-print(test.result_matrix)
+params = define_parameters()
+dqnAgent = DQNAgent(params)
+mitigation = Environment(singular_values, limit_matrix)
+mitigation.perform_u_change(change_u)
+mitigation.perform_v_change(change_v)
+mitigation.generate_result_matrix()
+dqnAgent.get_state(mitigation)
