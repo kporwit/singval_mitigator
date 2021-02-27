@@ -69,13 +69,13 @@ class Environment:
         #saves change matrix to the class atribute
         self.change_U = change_u
         #performs item wise multiplication on a U matrix
-        self.U = np.multiply(self.U, change_u)
+        self.U = np.add(self.U, change_u)
         logging.debug("Generated U matrix \n%s", self.U)
         return self.U
 
     def perform_v_change(self, change_v):
         self.change_V = change_v
-        self.V = np.multiply(self.V, change_v)
+        self.V = np.add(self.V, change_v)
         logging.debug("Generated V matrix \n%s", self.V)
         return self.V
 
@@ -91,6 +91,7 @@ def run(params):
     change_v = np.array([[0.1,-0.1], [0.1,0.1]], dtype=float)
 
     #Initialize classes
+    #mitigation = Environment(singular_values, limit_matrix)
     agent = DQNAgent(params)
     agent = agent.to(DEVICE)
     agent.optimizer = optim.Adam(agent.parameters(), weight_decay = 0, lr=params['learning_rate'])
@@ -100,26 +101,26 @@ def run(params):
     while counter_games < params['episodes']:
         
         mitigation = Environment(singular_values, limit_matrix)
-
-        mitigation.perform_u_change(change_u)
-        mitigation.perform_v_change(change_v)
-        mitigation.generate_result_matrix()
-        agent.get_state(mitigation)
+        #mitigation.perform_u_change(change_u)
+        #mitigation.perform_v_change(change_v)
+        #mitigation.generate_result_matrix()
 
         steps = 0 #steps since the last positive reward
-        while steps < 100:
+        while steps < 1000:
             if not params['train']:
                 agent.epsilon = 0.01
             else:
                 agent.epsilon = 1 - (counter_games * params['epsilon_decay_linear'])
+            logging.debug("Step %s, epsilon %s", steps, agent.epsilon)
             #get old state
             state_old = agent.get_state(mitigation)
 
             #preform action based on agent.epsilon or choose the action
             if random.uniform(0,1) < agent.epsilon:
                 #change U and V randomly
-                final_u_move = np.multiply(change_u, np.random.uniform(-0.1,0.1,(2,2)))
-                final_v_move = np.multiply(change_v, np.random.uniform(-0.1,0.1,(2,2)))
+                final_u_move = np.random.uniform(-0.1,0.1,(2,2))
+                final_v_move = np.random.uniform(-0.1,0.1,(2,2))
+                logging.debug("Changing U and V randomly")
             else:
                 #predict action based on the old state
                 with torch.no_grad():
@@ -127,6 +128,7 @@ def run(params):
                     prediction = agent(state_old_tensor)
                     final_u_move = prediction.detach().cpu().numpy()[0][0:4].reshape((2,2))
                     final_v_move = prediction.detach().cpu().numpy()[0][4:].reshape((2,2))
+                logging.debug("Changing U and V based on the prediction %s", prediction)
             #perform new move and get new state
             mitigation.perform_u_change(final_u_move)
             mitigation.perform_v_change(final_v_move)
@@ -138,10 +140,23 @@ def run(params):
             if reward > 0:
                 steps = 0
 
+            if params['train']:
+                #train short memory based on the new action and state
+                agent.train_short_memory(state_old, final_u_move, final_v_move, reward, state_new, False)
+                #store new data into long term memory
+                agent.remember(state_old, final_u_move, final_v_move, reward, state_new, False)
+
             steps += 1
+
+        if params['train']:
+            agent.replay_new(agent.memory, params['batch_size'])
 
         logging.info("Game: %s reward %s", counter_games, agent.reward)
         counter_games += 1
+
+    if params['train']:
+        model_weights = agent.state_dict()
+        torch.save(model_weights, params['weights_path'])
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
