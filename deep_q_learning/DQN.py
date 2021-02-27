@@ -13,6 +13,7 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s: %(me
 
 class DQNAgent(torch.nn.Module):
     def __init__(self, params):
+        super().__init__()
         self.reward = 0
         self.gamma = 0.9
         self.short_memory = np.array([])
@@ -26,26 +27,27 @@ class DQNAgent(torch.nn.Module):
         self.third_layer = params['third_layer_size']
         self.memory = collections.deque(maxlen=params['memory_size'])
         self.weights = params['weights_path']
+        self.load_weights = params['load_weights']
         self.optimizer = None
-        #self.network()
+        self.network()
 
-    #def network(self):
-    #    # Layers
-    #    self.f1 = nn.Linear(11, self.first_layer)
-    #    self.f2 = nn.Linear(self.first_layer, self.second_layer)
-    #    self.f3 = nn.Linear(self.second_layer, self.third_layer)
-    #    self.f4 = nn.Linear(self.third_layer, 3)
-    #    # weights
-    #    if self.load_weights:
-    #        self.model = self.load_state_dict(torch.load(self.weights))
-    #        print("weights loaded")
+    def network(self):
+        # Layers
+        self.f1 = nn.Linear(11, self.first_layer)
+        self.f2 = nn.Linear(self.first_layer, self.second_layer)
+        self.f3 = nn.Linear(self.second_layer, self.third_layer)
+        self.f4 = nn.Linear(self.third_layer, 3)
+        # weights
+        if self.load_weights:
+            self.model = self.load_state_dict(torch.load(self.weights))
+            print("weights loaded")
 
-    #def forward(self, x):
-    #    x = F.relu(self.f1(x))
-    #    x = F.relu(self.f2(x))
-    #    x = F.relu(self.f3(x))
-    #    x = F.softmax(self.f4(x), dim=-1)
-    #    return x
+    def forward(self, x):
+        x = F.relu(self.f1(x))
+        x = F.relu(self.f2(x))
+        x = F.relu(self.f3(x))
+        x = F.softmax(self.f4(x), dim=-1)
+        return x
 
     def get_state(self, environment):
         """

@@ -1,7 +1,15 @@
 import numpy as np
 import logging
 import sys
+import argparse
 from DQN import DQNAgent
+import random
+import statistics
+import torch.optim as optim
+import torch
+import datetime
+
+DEVICE = 'cpu'
 
 def define_parameters():
         params = dict()
@@ -16,14 +24,12 @@ def define_parameters():
         params['batch_size'] = 1000
         # Settings
         params['weights_path'] = 'weights/weights.h5'
-        params['train'] = False
-        params["test"] = True
-        params['plot_score'] = True
+        params['train'] = True
+        params["test"] = False
+        params['verbosity'] = 'DEBUG'
 
         return params
 
-#Set up logging format
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s: %(message)s')
 
 class Environment:
     """ Initialize environment """
@@ -77,14 +83,35 @@ class Environment:
         logging.debug("Generated result matrix \n%s", self.result_matrix)
         return self.result_matrix
 
-singular_values = np.array([1, 0.99], dtype=float)
-limit_matrix = np.array([[0.934,0.174],[0.103,0.548]], dtype=float)
-change_u = np.array([[1,1], [1,-1]], dtype=float)
-change_v = np.array([[1,-1], [1,1]], dtype=float)
-params = define_parameters()
-dqnAgent = DQNAgent(params)
-mitigation = Environment(singular_values, limit_matrix)
-mitigation.perform_u_change(change_u)
-mitigation.perform_v_change(change_v)
-mitigation.generate_result_matrix()
-dqnAgent.get_state(mitigation)
+def run(params):
+    singular_values = np.array([1, 0.99], dtype=float)
+    limit_matrix = np.array([[0.934,0.174],[0.103,0.548]], dtype=float)
+    change_u = np.array([[1,1], [1,-1]], dtype=float)
+    change_v = np.array([[1,-1], [1,1]], dtype=float)
+
+    #Initialize classes
+    agent = DQNAgent(params)
+    agent = agent.to(DEVICE)
+    agent.optimizer = optim.Adam(agent.parameters(), weight_decay = 0, lr=params['learning_rate'])
+    throws_counter = 0
+
+    mitigation = Environment(singular_values, limit_matrix)
+
+    mitigation.perform_u_change(change_u)
+    mitigation.perform_v_change(change_v)
+    mitigation.generate_result_matrix()
+    agent.get_state(mitigation)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    params = define_parameters()
+    #Set up logging format
+    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s: %(message)s')
+    if params['train']:
+        logging.info("Traininig...")
+        params['load_weights'] = False
+        run(params)
+    if params['test']:
+        logging.info("Testing...")
+        params['load_weights'] = True
+        run(params)
