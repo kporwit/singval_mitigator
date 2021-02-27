@@ -33,10 +33,10 @@ class DQNAgent(torch.nn.Module):
 
     def network(self):
         # Layers
-        self.f1 = nn.Linear(11, self.first_layer)
+        self.f1 = nn.Linear(4, self.first_layer)
         self.f2 = nn.Linear(self.first_layer, self.second_layer)
         self.f3 = nn.Linear(self.second_layer, self.third_layer)
-        self.f4 = nn.Linear(self.third_layer, 3)
+        self.f4 = nn.Linear(self.third_layer, 8)
         # weights
         if self.load_weights:
             self.model = self.load_state_dict(torch.load(self.weights))
@@ -71,3 +71,12 @@ class DQNAgent(torch.nn.Module):
                 state_index += 1
         logging.debug("State list %s", state)
         return np.asarray(state)
+
+    def set_reward(self, result_matrix, limit_matrix): 
+        self.reward = 0
+        record = np.sum(np.square(np.subtract(result_matrix, limit_matrix)))
+        if record < 0.5:
+            self.reward = 10
+        else:
+            self.reward = 0
+        return self.reward

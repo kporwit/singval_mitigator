@@ -3,6 +3,7 @@ import logging
 import sys
 import argparse
 from DQN import DQNAgent
+from random import randint
 import random
 import statistics
 import torch.optim as optim
@@ -86,21 +87,61 @@ class Environment:
 def run(params):
     singular_values = np.array([1, 0.99], dtype=float)
     limit_matrix = np.array([[0.934,0.174],[0.103,0.548]], dtype=float)
-    change_u = np.array([[1,1], [1,-1]], dtype=float)
-    change_v = np.array([[1,-1], [1,1]], dtype=float)
+    change_u = np.array([[0.1,0.1], [0.1,-0.1]], dtype=float)
+    change_v = np.array([[0.1,-0.1], [0.1,0.1]], dtype=float)
 
     #Initialize classes
     agent = DQNAgent(params)
     agent = agent.to(DEVICE)
     agent.optimizer = optim.Adam(agent.parameters(), weight_decay = 0, lr=params['learning_rate'])
-    throws_counter = 0
+    counter_games = 0
+    record = 0
+    total_score = 0
+    while counter_games < params['episodes']:
+        
+        mitigation = Environment(singular_values, limit_matrix)
 
-    mitigation = Environment(singular_values, limit_matrix)
+        mitigation.perform_u_change(change_u)
+        mitigation.perform_v_change(change_v)
+        mitigation.generate_result_matrix()
+        agent.get_state(mitigation)
 
-    mitigation.perform_u_change(change_u)
-    mitigation.perform_v_change(change_v)
-    mitigation.generate_result_matrix()
-    agent.get_state(mitigation)
+        steps = 0 #steps since the last positive reward
+        while steps < 100:
+            if not params['train']:
+                agent.epsilon = 0.01
+            else:
+                agent.epsilon = 1 - (counter_games * params['epsilon_decay_linear'])
+            #get old state
+            state_old = agent.get_state(mitigation)
+
+            #preform action based on agent.epsilon or choose the action
+            if random.uniform(0,1) < agent.epsilon:
+                #change U and V randomly
+                final_u_move = np.multiply(change_u, np.random.uniform(-0.1,0.1,(2,2)))
+                final_v_move = np.multiply(change_v, np.random.uniform(-0.1,0.1,(2,2)))
+            else:
+                #predict action based on the old state
+                with torch.no_grad():
+                    state_old_tensor = torch.tensor(state_old.reshape((1,4)), dtype=torch.float32).to(DEVICE)
+                    prediction = agent(state_old_tensor)
+                    final_u_move = prediction.detach().cpu().numpy()[0][0:4].reshape((2,2))
+                    final_v_move = prediction.detach().cpu().numpy()[0][4:].reshape((2,2))
+            #perform new move and get new state
+            mitigation.perform_u_change(final_u_move)
+            mitigation.perform_v_change(final_v_move)
+            mitigation.generate_result_matrix()
+            state_new = agent.get_state(mitigation)
+
+            #set reward for the new state
+            reward = agent.set_reward(mitigation.result_matrix, mitigation.limit_matrix)
+            if reward > 0:
+                steps = 0
+
+            steps += 1
+
+        logging.info("Game: %s reward %s", counter_games, agent.reward)
+        counter_games += 1
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
