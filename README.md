@@ -36,6 +36,17 @@ python3 s3mitigator.py s3.out 1 1000
 ```
 Please remember that accepted arguments are **positional** which means that the correct order of the arguments is expected.
 
+### Run in the background
+Based on the provided random throws number the script may take a long time to execute. The best way to run it is to set it up on some remote machine (which is always on) and run it in background. There are three ways to do it on a Linux machine:
+1. [tmux](https://github.com/tmux/tmux/wiki) terminal multiplexer which allows to detach from the remote terminal and close the SSH session to the remote machine while leaving the detached terminal running,
+2. [screen](https://www.gnu.org/software/screen/) same as above,
+3. setting up a `NOHUP (No Hang Up)` signal for the python3 script process and sending the process in the background which allows to close the remote session without interuption of the process.
+Such behaviour can be achived via `nohup` command:
+```
+nohup 's3mitigator.py s3.out 1 1000' &
+```
+where `&` sign means that the process will be send to the background. If we drop the remote connection and after a while reconect to the machine and we want to recover the process we just need to bring the process in the foreground which can be done with the command `fg`.
+
 
 ## alpha_utils
 alpha_utils.py consists the original script from [http://dx.doi.org/10.1023/A:1021969818438](http://dx.doi.org/10.1023/A:1021969818438) converted to python. One must import this file and use `create_alpha` function which has three parameters:
