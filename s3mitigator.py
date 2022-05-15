@@ -1,6 +1,5 @@
 from alpha_utils import create_alpha
 from random import seed, randrange, uniform
-from tqdm import tqdm
 import numpy as np
 from numpy import linalg as LA
 import time
@@ -65,7 +64,6 @@ for i in range(decraesequantity):
     maj_problem = 0
     positive_fit = 0
     negative_fit = 0
-    #for j in tqdm(range(nthrows)):
     for j in range(nthrows):
         e = np.array([uniform(compmatrix[0,0], 1), uniform(compmatrix[1,1], 1),
              uniform(compmatrix[2,2], 1)], dtype=np.float64)

@@ -1,12 +1,12 @@
 # Repository for singular value approach studies.
 
 ## Dependencies
-The main scripts needs these pythan packages installed:
-1. numpy
-2. tqdm
-Please install it via pip3 before running a main script:
+The main scripts needs these python packages installed:
+1. [numpy](https://numpy.org/)
+
+Please install it via pip3 before running the main scripts:
 ```
-pip3 install numpy tqdm
+pip3 install numpy
 ```
 
 ## Main scripts
@@ -18,7 +18,7 @@ In this repository three main scripts exists:
 All of them accept three positional arguments:
 1. name of the output file where the results will be saved,
 2. number of matrix with experimental boundaries on T matrix (1 - m > EW ,2 - dm^2 > 100 eV^2, 3 - dm^2 ~ 0.1 - 1 eV^2) saved in the file experimental_boundaries.py,
-3. number of random throws of the eigenvalues.
+3. number of random throws of the eigenvalues per one sifting procedure.
 
 Scripts takes T matrix from the experimental_boundaries.py file and constructs the alpha matrices from them. After that for the given set of singular values (i.e. for the s3mitigator.py script which tries to minimalize the third singular value only):
 1. `[1.0, 1.0, 0.9999]` for scenario 1,
