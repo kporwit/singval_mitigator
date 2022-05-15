@@ -41,11 +41,7 @@ Based on the provided random throws number the script may take a long time to ex
 1. [tmux](https://github.com/tmux/tmux/wiki) terminal multiplexer which allows to detach from the remote terminal and close the SSH session to the remote machine while leaving the detached terminal running,
 2. [screen](https://www.gnu.org/software/screen/) same as above,
 3. setting up a `NOHUP (No Hang Up)` signal for the python3 script process and sending the process in the background which allows to close the remote session without interuption of the process.
-Such behaviour can be achived via `nohup` command:
-```
-nohup 's3mitigator.py s3.out 1 1000' &
-```
-where `&` sign means that the process will be send to the background. If we drop the remote connection and after a while reconect to the machine and we want to recover the process we just need to bring the process in the foreground which can be done with the command `fg`.
+Such behaviour can be achived via `nohup` command: `nohup s3mitigator.py s3.out 1 1000 &`, where `&` sign means that the process will be send to the background. If we drop the remote connection and after a while reconect to the machine and we want to recover the process we just need to bring the process in the foreground which can be done with the command `fg`.
 
 
 ## alpha_utils
