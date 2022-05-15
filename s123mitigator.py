@@ -1,9 +1,9 @@
 from alpha_utils import create_alpha
 from random import seed, randrange, uniform
-from tqdm import tqdm
 from numpy import linalg as LA
 import numpy as np
 import time
+import experimental_boundaries as exp
 import sys
 import os.path
 
@@ -30,17 +30,6 @@ f.write('========================================\n' +
 f.write('\n========================================\n' + str(sys.argv) +
         '\n========================================\n')
 
-#comparision betwen experimental boundries
-expmatrix1 = np.array([[1.3e-3, 0, 0],\
-                       [6.8e-4, 2.2e-4, 0],\
-                       [2.7e-3, 1.2e-3, 2.8e-3]], dtype=np.float64)
-expmatrix2 = np.array([[2.4e-2, 0, 0],\
-                       [2.5e-2, 2.2e-2, 0],\
-                       [6.9e-2, 1.2e-2, 1.0e-1]], dtype=np.float64)
-expmatrix3 = np.array([[1.0e-2, 0, 0],\
-                       [1.7e-2, 1.4e-2, 0],\
-                       [4.5e-2, 5.3e-2, 1.0e-1]], dtype=np.float64)
-
 #matrix for proper final result
 fin_result = np.zeros((3,3), dtype=np.float64)
 #matrices for maximal and minimal entries of generated alpha
@@ -50,19 +39,19 @@ minimal = np.zeros((3,3), dtype=np.float64)
 exp_boundry = int(sys.argv[2])
 
 if exp_boundry == 1:
-    compmatrix = np.eye(3) - expmatrix1
+    compmatrix = np.eye(3) - exp.expmatrix1
     s = np.array([1.0, 0.9999, 0.9999], dtype=np.float64)
     sjump = np.double(0.0001)
     decraesequantity = 10000
     decimals = 4
 elif exp_boundry == 2:
-    compmatrix = np.eye(3) - expmatrix2
+    compmatrix = np.eye(3) - exp.expmatrix2
     s = np.array([1.0, 0.999, 0.999], dtype=np.float64)
     sjump = np.double(0.001)
     decraesequantity = 1000
     decimals = 3
 elif exp_boundry == 3:
-    compmatrix = np.eye(3) - expmatrix3
+    compmatrix = np.eye(3) - exp.expmatrix3
     s = np.array([1.0, 0.999, 0.999], dtype=np.float64)
     sjump = np.double(0.001)
     decraesequantity = 1000
@@ -76,7 +65,6 @@ for i in range(decraesequantity):
     maj_problem = 0
     positive_fit = 0
     negative_fit = 0
-    #for j in tqdm(range(nthrows)):
     for j in range(nthrows):
         e = np.array([uniform(compmatrix[0,0], 1), uniform(compmatrix[1,1], 1),
              uniform(compmatrix[2,2], 1)], dtype=np.float64)
